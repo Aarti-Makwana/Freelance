@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import withRouter from "../../components/Common/withRouter";
-
+import { request } from "../../api/apiServices/api.js";
 //redux
 import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "reselect";
@@ -43,34 +43,38 @@ const Login = (props) => {
 
     initialValues: {
       email: "admin@themesbrand.com" || "",
-      password: "123456" || "",
+      password: "Test@123" || "",
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Your Email"),
       password: Yup.string().required("Please Enter Your Password"),
     }),
-    onSubmit: (values) => {
-      dispatch(loginUser(values, props.router.navigate));
+    onSubmit: async (values) => {
+      try {
+        const { email, password } = values;
+        await request("/user/login_pass", "POST", { email, password });
+        dispatch(loginUser(values, props.router.navigate));
+      } catch (error) {
+        console.log("Error while login user ", error);
+      }
     },
   });
 
   const LoginProperties = createSelector(
     (state) => state.Login,
     (login) => ({
-      error: login.error
+      error: login.error,
     })
   );
 
-  const {
-    error
-  } = useSelector(LoginProperties);
+  const { error } = useSelector(LoginProperties);
 
-  const signIn = type => {
+  const signIn = (type) => {
     dispatch(socialLogin(type, props.router.navigate));
   };
 
   //for facebook and google authentication
-  const socialResponse = type => {
+  const socialResponse = (type) => {
     signIn(type);
   };
 
@@ -172,13 +176,13 @@ const Login = (props) => {
                           onBlur={validation.handleBlur}
                           invalid={
                             validation.touched.password &&
-                              validation.errors.password
+                            validation.errors.password
                               ? true
                               : false
                           }
                         />
                         {validation.touched.password &&
-                          validation.errors.password ? (
+                        validation.errors.password ? (
                           <FormFeedback type="invalid">
                             {validation.errors.password}
                           </FormFeedback>
@@ -216,7 +220,7 @@ const Login = (props) => {
                             <Link
                               to="#"
                               className="social-list-item bg-primary text-white border-primary"
-                              onClick={e => {
+                              onClick={(e) => {
                                 e.preventDefault();
                                 socialResponse("facebook");
                               }}
@@ -249,7 +253,7 @@ const Login = (props) => {
                             <Link
                               to="#"
                               className="social-list-item bg-danger text-white border-danger"
-                              onClick={e => {
+                              onClick={(e) => {
                                 e.preventDefault();
                                 socialResponse("google");
                               }}

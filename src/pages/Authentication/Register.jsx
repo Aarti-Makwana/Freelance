@@ -1,5 +1,17 @@
 import React, { useEffect } from "react";
-import { Row, Col, CardBody, Card, Alert, Container, Input, Label, Form, FormFeedback } from "reactstrap";
+import {
+  Row,
+  Col,
+  CardBody,
+  Card,
+  Alert,
+  Container,
+  Input,
+  Label,
+  Form,
+  FormFeedback,
+} from "reactstrap";
+import { request } from "../../api/apiServices/api.js";
 
 // Formik Validation
 import * as Yup from "yup";
@@ -29,18 +41,29 @@ const Register = () => {
     enableReinitialize: true,
 
     initialValues: {
-      email: '',
-      username: '',
-      password: '',
+      email: "",
+      username: "",
+      password: "",
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Your Email"),
       username: Yup.string().required("Please Enter Your Username"),
       password: Yup.string().required("Please Enter Your Password"),
     }),
-    onSubmit: (values) => {
-      dispatch(registerUser(values));
-    }
+    onSubmit: async (values) => {
+      try {
+        const res = await request("/user/signup", "POST", {
+          username: values?.username,
+          firstName: values?.username,
+          lastName: values?.username,
+          email: values?.email,
+          password: values?.password,
+        });
+        dispatch(registerUser(values));
+      } catch (error) {
+        console.log("Error while registration user ", error);
+      }
+    },
   });
 
   const AccountProperties = createSelector(
@@ -64,7 +87,6 @@ const Register = () => {
 
   return (
     <React.Fragment>
-
       <div className="home-btn d-none d-sm-block">
         <Link to="/" className="text-dark">
           <i className="bx bx-home h2" />
@@ -146,11 +168,15 @@ const Register = () => {
                           onBlur={validation.handleBlur}
                           value={validation.values.email || ""}
                           invalid={
-                            validation.touched.email && validation.errors.email ? true : false
+                            validation.touched.email && validation.errors.email
+                              ? true
+                              : false
                           }
                         />
                         {validation.touched.email && validation.errors.email ? (
-                          <FormFeedback type="invalid">{validation.errors.email}</FormFeedback>
+                          <FormFeedback type="invalid">
+                            {validation.errors.email}
+                          </FormFeedback>
                         ) : null}
                       </div>
 
@@ -164,11 +190,17 @@ const Register = () => {
                           onBlur={validation.handleBlur}
                           value={validation.values.username || ""}
                           invalid={
-                            validation.touched.username && validation.errors.username ? true : false
+                            validation.touched.username &&
+                            validation.errors.username
+                              ? true
+                              : false
                           }
                         />
-                        {validation.touched.username && validation.errors.username ? (
-                          <FormFeedback type="invalid">{validation.errors.username}</FormFeedback>
+                        {validation.touched.username &&
+                        validation.errors.username ? (
+                          <FormFeedback type="invalid">
+                            {validation.errors.username}
+                          </FormFeedback>
                         ) : null}
                       </div>
                       <div className="mb-3">
@@ -181,11 +213,17 @@ const Register = () => {
                           onBlur={validation.handleBlur}
                           value={validation.values.password || ""}
                           invalid={
-                            validation.touched.password && validation.errors.password ? true : false
+                            validation.touched.password &&
+                            validation.errors.password
+                              ? true
+                              : false
                           }
                         />
-                        {validation.touched.password && validation.errors.password ? (
-                          <FormFeedback type="invalid">{validation.errors.password}</FormFeedback>
+                        {validation.touched.password &&
+                        validation.errors.password ? (
+                          <FormFeedback type="invalid">
+                            {validation.errors.password}
+                          </FormFeedback>
                         ) : null}
                       </div>
 

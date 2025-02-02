@@ -49,6 +49,7 @@ import InvoiceDetail from "../pages/Invoices/invoices-detail";
 import Login from "../pages/Authentication/Login";
 import Logout from "../pages/Authentication/Logout";
 import Register from "../pages/Authentication/Register";
+import Services from "../pages/Authentication/Service";
 import ForgetPwd from "../pages/Authentication/ForgetPassword";
 
 // //  // Inner Authentication
@@ -176,21 +177,15 @@ import ContactsList from "../pages/Contacts/ContactList/contacts-list";
 import ContactsProfile from "../pages/Contacts/ContactsProfile/index";
 import UiProgressbar from "../pages/Ui/UiProgressbar";
 import Vendors from "../pages/Vendors";
-import SubCategories from "../pages/SubCategories";
-
 import VendorsDetails from "../pages/Vendors/VendorsDetails";
 import UserDetails from "../pages/Users/UserDetails";
 import Users from "../pages/Users";
 import Employees from "../pages/Employees";
 import EmployeesDetails from "../pages/Employees/EmployeesDetails";
-import Subscription from "../pages/Subscription";
 // import UiProgressbar from "../../src/pages/Ui/UiProgressbar"
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
-  { path: "/subcategory", component: <SubCategories /> },
-  { path: "/subscription", component: <Subscription /> },
-
   { path: "/vendors", component: <Vendors /> },
   { path: "/vendors-detail/:id", component: <VendorsDetails /> },
   { path: "/users", component: <Users /> },
@@ -351,6 +346,7 @@ const publicRoutes = [
   { path: "/login", component: <Login /> },
   { path: "/forgot-password", component: <ForgetPwd /> },
   { path: "/register", component: <Register /> },
+  { path: "/services", component: <Services /> },
 
   { path: "/pages-maintenance", component: <PagesMaintenance /> },
   { path: "/pages-comingsoon", component: <PagesComingsoon /> },

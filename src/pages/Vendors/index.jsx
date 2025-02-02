@@ -44,7 +44,6 @@ import { isEmpty } from "lodash";
 import { useSelector, useDispatch } from "react-redux";
 import { createSelector } from "reselect";
 import { ToastContainer } from "react-toastify";
-import { createCategory, getCategories } from "../../api";
 
 const Vendors = () => {
   //meta title
@@ -54,7 +53,7 @@ const Vendors = () => {
   const dispatch = useDispatch();
   const [contact, setContact] = useState();
   // validation
-  const categoryValidation = useFormik({
+  const validation = useFormik({
     // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
@@ -181,45 +180,17 @@ const Vendors = () => {
     toggle();
   };
 
-  const [categories, setCategories] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState();
-  const [catLevel, setCatLevel] = useState("");
-  const [parentCategory, setParentCategory] = useState("");
-  const [sort, setSort] = useState("");
-  const [error, setError] = useState("");
-  
-  const fetchCategories = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await getCategories(page, limit, catLevel, parentCategory, sort);
-      console.log(response.categoriesData);
-
-      setCategories(response.categoriesData);
-
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-      setError("An error occurred while fetching categories.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchCategories();
-  }, [page, limit, catLevel, parentCategory, sort]);
-
   const columns = useMemo(
     () => [
       {
         header: "#",
-        accessorKey: "imageJson.url",
+        accessorKey: "img",
         cell: (cell) => (
           <>
             {!cell.getValue() ? (
               <div className="avatar-xs">
                 <span className="avatar-title rounded-circle">
-                  {cell.row.original.name.charAt(0)}
+                  {cell.row.original.name.charAt(0)}{" "}
                 </span>
               </div>
             ) : (
@@ -249,38 +220,99 @@ const Vendors = () => {
                   {cell.getValue()}
                 </Link>
               </h5>
-              <p className="text-muted mb-0">{cell.row.original.description}</p>
+              <p className="text-muted mb-0">{cell.row.original.designation}</p>
             </>
           );
         },
       },
       {
-        header: "Category Level",
-        accessorKey: "catLevel",
+        header: "Email",
+        accessorKey: "email",
         enableColumnFilter: false,
         enableSorting: true,
       },
       {
-        header: "Priority",
-        accessorKey: "priority",
+        header: "Mobile",
+        accessorKey: "mobile",
         enableColumnFilter: false,
         enableSorting: true,
       },
       {
-        header: "Created At",
-        accessorKey: "createdAt",
+        header: "Status",
+        accessorKey: "status",
         enableColumnFilter: false,
         enableSorting: true,
-        cell: (cell) => new Date(cell.getValue()).toLocaleDateString(),
+        cell: (cell) => {
+          const colorStatus =
+            cell.getValue() == "active"
+              ? "badge-soft-success"
+              : cell.getValue() == "suspend"
+              ? "badge-soft-danger"
+              : cell.getValue() == "inactive"
+              ? "badge-soft-secondary"
+              : "badge-soft-primary";
+          return (
+            <>
+              <Link to="#1" className={`badge ${colorStatus} font-size-11 m-1`}>
+                {cell.getValue()}
+              </Link>
+            </>
+          );
+        },
       },
+      {
+        header: "Location",
+        accessorKey: "location",
+        enableColumnFilter: false,
+        enableSorting: true,
+        cell: (cell) => {
+          return (
+            <>
+              <h5 className="font-size-14 mb-1">
+                <Link to="#" className="text-secondary">
+                  {cell.row.original.city}
+                </Link>
+              </h5>
+              <p className="text-muted mb-0">{cell.row.original.state}</p>
+            </>
+          );
+        },
+      },
+      //   {
+      //     header: 'Tags',
+      //     accessorKey: 'tags',
+      //     enableColumnFilter: false,
+      //     enableSorting: true,
+      //     cell: (cell) => {
+      //       return (
+      //         <div>
+      //           {
+      //             cell.getValue()?.map((item, index) => (
+      //               <Link to="#1" className="badge badge-soft-primary font-size-11 m-1" key={index}>{item}</Link>
+      //             ))
+      //           }
+      //         </div>
+      //       );
+      //     },
+      //   },
+      //   {
+      //     header: 'Projects',
+      //     accessorKey: 'projects',
+      //     enableColumnFilter: false,
+      //     enableSorting: true,
+      //   },
       {
         header: "Action",
         cell: (cellProps) => {
           return (
             <div className="d-flex gap-3">
               <Link
-                to={"/vendors-detail/" + cellProps.row.original._id}
+                to={"/vendors-detail/" + cellProps.row.original.id}
                 className="text-success"
+                // onClick={() => {
+                //   const userData = cellProps.row.original;
+                //   handleUserClick(userData);
+                // }}
               >
                 <i className="mdi mdi-pencil font-size-18" id="edittooltip" />
               </Link>
@@ -302,56 +334,6 @@ const Vendors = () => {
     []
   );
 
-  // Add these new state variables
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
-
-  // Update validation schema
-  const validation = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      name: "",
-      description: "",
-      catLevel: "",
-      imageId: "img_67890", // hardcoded for now
-      parentCategory: "", // optional
-      createdBy: "671b0860a814f4e9449ba5a5" // hardcoded for now
-    },
-    validationSchema: Yup.object({
-      name: Yup.string().required("Please Enter Category Name"),
-      description: Yup.string().required("Please Enter Category Description"),
-      catLevel: Yup.number().required("Please Enter Category Level"),
-    }),
-    onSubmit: async (values) => {
-      try {
-        const categoryData = {
-          ...values,
-          imageJson: {
-            url: imageUrl || "https://example.com/image.jpg" // default image if none selected
-          },
-          parentCategory: values.parentCategory || null
-        };
-        
-        await createCategory(
-          categoryData.name,
-          categoryData.description,
-          categoryData.imageId,
-          categoryData.catLevel,
-          categoryData.imageJson,
-          categoryData.parentCategory,
-          categoryData.createdBy
-        );
-
-        fetchCategories(); // Refresh the list
-        toggle(); // Close modal
-        validation.resetForm();
-      } catch (error) {
-        console.error("Error creating category:", error);
-        // Add error handling/notification here
-      }
-    },
-  });
-
   return (
     <React.Fragment>
       <DeleteModal
@@ -372,7 +354,7 @@ const Vendors = () => {
                   <CardBody>
                     <TableContainer
                       columns={columns}
-                      data={categories || []}
+                      data={users || []}
                       isGlobalFilter={true}
                       isPagination={true}
                       SearchPlaceholder="Search..."
@@ -380,7 +362,7 @@ const Vendors = () => {
                       isAddButton={true}
                       handleUserClick={handleUserClicks}
                       buttonClass="btn btn-success btn-rounded waves-effect waves-light addContact-modal mb-2"
-                      buttonName="New Category"
+                      buttonName="New Contact"
                       tableClass="align-middle table-nowrap table-hover dt-responsive nowrap w-100 dataTable no-footer dtr-inline"
                       theadClass="table-light"
                       paginationWrapper="dataTables_paginate paging_simple_numbers pagination-rounded"
@@ -394,77 +376,205 @@ const Vendors = () => {
           <Modal isOpen={modal} toggle={toggle}>
             <ModalHeader toggle={toggle} tag="h4">
               {" "}
-              {!!isEdit ? "Edit Category" : "Add Category"}
+              {!!isEdit ? "Edit Vendor" : "Add Vendor"}
             </ModalHeader>
             <ModalBody>
-              <Form onSubmit={validation.handleSubmit}>
+              <Form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  validation.handleSubmit();
+                  return false;
+                }}
+              >
                 <Row>
                   <Col xs={12}>
-                    <FormGroup>
-                      <Label>Name</Label>
+                    <Row xs={12}>
+                      <div className="mb-3">
+                        <Label>First Name</Label>
+                        <Input
+                          name="fname"
+                          type="text"
+                          placeholder="Enter First Name"
+                          onChange={validation.handleChange}
+                          onBlur={validation.handleBlur}
+                          value={validation.values.fname || ""}
+                          invalid={
+                            validation.touched.fname && validation.errors.fname
+                              ? true
+                              : false
+                          }
+                        />
+                        {validation.touched.fname && validation.errors.fname ? (
+                          <FormFeedback type="invalid">
+                            {validation.errors.fname}
+                          </FormFeedback>
+                        ) : null}
+                      </div>
+                      <div className="mb-3">
+                        <Label>Last Name</Label>
+                        <Input
+                          name="lname"
+                          type="text"
+                          placeholder="Enter Last Name"
+                          onChange={validation.handleChange}
+                          onBlur={validation.handleBlur}
+                          value={validation.values.lname || ""}
+                          invalid={
+                            validation.touched.lname && validation.errors.lname
+                              ? true
+                              : false
+                          }
+                        />
+                        {validation.touched.lname && validation.errors.lname ? (
+                          <FormFeedback type="invalid">
+                            {validation.errors.lname}
+                          </FormFeedback>
+                        ) : null}
+                      </div>
+                    </Row>
+                    <div className="mb-3">
+                      <Label>Email</Label>
                       <Input
-                        name="name"
-                        type="text"
-                        placeholder="Enter Category Name"
+                        name="email"
+                        label="Email"
+                        type="email"
+                        placeholder="Enter E-mail"
                         onChange={validation.handleChange}
                         onBlur={validation.handleBlur}
-                        value={validation.values.name || ""}
-                        invalid={validation.touched.name && validation.errors.name}
+                        value={validation.values.email || ""}
+                        invalid={
+                          validation.touched.email && validation.errors.email
+                            ? true
+                            : false
+                        }
                       />
-                      {validation.touched.name && validation.errors.name && (
-                        <FormFeedback type="invalid">{validation.errors.name}</FormFeedback>
-                      )}
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Label>Description</Label>
+                      {validation.touched.email && validation.errors.email ? (
+                        <FormFeedback type="invalid">
+                          {" "}
+                          {validation.errors.email}{" "}
+                        </FormFeedback>
+                      ) : null}
+                    </div>
+                    {/* <div className="mb-3">
+                      <Label>Option</Label>
                       <Input
-                        name="description"
-                        type="textarea"
-                        placeholder="Enter Description"
-                        onChange={validation.handleChange}
-                        onBlur={validation.handleBlur}
-                        value={validation.values.description || ""}
-                        invalid={validation.touched.description && validation.errors.description}
-                      />
-                      {validation.touched.description && validation.errors.description && (
-                        <FormFeedback type="invalid">{validation.errors.description}</FormFeedback>
-                      )}
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Label>Category Level</Label>
-                      <Input
-                        name="catLevel"
                         type="select"
+                        name="tags"
+                        className="form-select"
+                        multiple={true}
                         onChange={validation.handleChange}
                         onBlur={validation.handleBlur}
-                        value={validation.values.catLevel || ""}
-                        invalid={validation.touched.catLevel && validation.errors.catLevel}
+                        value={validation.values.tags || []}
+                        invalid={
+                          validation.touched.tags && validation.errors.tags
+                            ? true
+                            : false
+                        }
                       >
-                        <option value="">Select Level</option>
-                        <option value="1">Level 1</option>
-                        <option value="2">Level 2</option>
+                        <option>Photoshop</option>
+                        <option>illustrator</option>
+                        <option>Html</option>
+                        <option>Php</option>
+                        <option>Java</option>
+                        <option>Python</option>
+                        <option>UI/UX Designer</option>
+                        <option>Ruby</option>
+                        <option>Css</option>
                       </Input>
-                      {validation.touched.catLevel && validation.errors.catLevel && (
-                        <FormFeedback type="invalid">{validation.errors.catLevel}</FormFeedback>
-                      )}
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Label>Parent Category</Label>
+                      {validation.touched.tags && validation.errors.tags ? (
+                        <FormFeedback type="invalid">
+                          {" "}
+                          {validation.errors.tags}{" "}
+                        </FormFeedback>
+                      ) : null}
+                    </div> */}
+                    <div className="mb-3">
+                      <Label className="form-label">Password</Label>
                       <Input
-                        name="parentCategory"
-                        type="text"
-                        placeholder="Parent Category ID (Optional)"
+                        name="password"
+                        type="password"
+                        placeholder="Enter Password"
                         onChange={validation.handleChange}
-                        value={validation.values.parentCategory || ""}
+                        onBlur={validation.handleBlur}
+                        value={validation.values.password || ""}
+                        invalid={
+                          validation.touched.password &&
+                          validation.errors.password
+                            ? true
+                            : false
+                        }
                       />
-                    </FormGroup>
-
-                    <div className="text-end mt-3">
-                      <Button type="submit" color="primary">
-                        {!!isEdit ? "Update Category" : "Create Category"}
+                      {validation.touched.password &&
+                      validation.errors.password ? (
+                        <FormFeedback type="invalid">
+                          {validation.errors.password}
+                        </FormFeedback>
+                      ) : null}
+                    </div>
+                    <div className="mb-3">
+                      <Label>Mobile</Label>
+                      <Input
+                        name="mobile"
+                        label="Mobile"
+                        type="text"
+                        placeholder="Enter Mobile"
+                        onChange={validation.handleChange}
+                        onBlur={validation.handleBlur}
+                        value={validation.values.mobile || ""}
+                        invalid={
+                          validation.touched.mobile && validation.errors.mobile
+                            ? true
+                            : false
+                        }
+                      />
+                      {validation.touched.mobile && validation.errors.mobile ? (
+                        <FormFeedback type="invalid">
+                          {" "}
+                          {validation.errors.mobile}{" "}
+                        </FormFeedback>
+                      ) : null}
+                    </div>
+                    {/* <div className="mb-3">
+                      <Label>Designation</Label>
+                      <Input
+                        type="select"
+                        name="designation"
+                        className="form-select"
+                        onChange={validation.handleChange}
+                        onBlur={validation.handleBlur}
+                        value={validation.values.designation || ""}
+                        invalid={
+                          validation.touched.designation &&
+                          validation.errors.designation
+                            ? true
+                            : false
+                        }
+                      >
+                        <option>Frontend Developer</option>
+                        <option>UI/UX Designer</option>
+                        <option>Backend Developer</option>
+                        <option>Full Stack Developer</option>
+                      </Input>
+                      {validation.touched.designation &&
+                      validation.errors.designation ? (
+                        <FormFeedback type="invalid">
+                          {" "}
+                          {validation.errors.designation}{" "}
+                        </FormFeedback>
+                      ) : null}
+                    </div> */}
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <div className="text-end">
+                      <Button
+                        type="submit"
+                        color="success"
+                        className="save-user"
+                      >
+                        {" "}
+                        {!!isEdit ? "Update" : "Add"}{" "}
                       </Button>
                     </div>
                   </Col>
