@@ -182,11 +182,16 @@ import UserDetails from "../pages/Users/UserDetails";
 import Users from "../pages/Users";
 import Employees from "../pages/Employees";
 import EmployeesDetails from "../pages/Employees/EmployeesDetails";
+import Subscription from "../pages/Subscription";
+import SubCategories from "../pages/SubCategories";
 // import UiProgressbar from "../../src/pages/Ui/UiProgressbar"
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: <Dashboard /> },
   { path: "/vendors", component: <Vendors /> },
+  { path: "/subcategory", component: <SubCategories /> },
+  { path: "/subscription", component: <Subscription /> },
+
   { path: "/vendors-detail/:id", component: <VendorsDetails /> },
   { path: "/users", component: <Users /> },
   { path: "/users-detail/:id", component: <UserDetails /> },
