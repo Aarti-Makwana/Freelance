@@ -159,6 +159,21 @@ const SidebarContent = (props) => {
               </Link>
             </li>
             <li>
+              <Link to="/subcategory" className=" ">
+              <i className="bx bx-store"></i>
+                <span>{props.t("Subcategory")}</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/subscription" className=" ">
+              <i className="bx bx-store"></i>
+                <span>{props.t("Subscription")}</span>
+              </Link>
+            </li>
+
+            
+            <li>
               <Link to="/users" className=" ">
               <i className="bx bx-user-circle"></i>
                 <span>{props.t("User Lists")}</span>
