@@ -7,5 +7,9 @@ export default defineConfig({
   esbuild: {
     jsxFactory: 'h',
     jsxFragment: 'Fragment',
-  }
+  },
+  server: {
+    host: '127.0.0.1', // Force Vite to use IPv4
+    port: 3000,        // You can also change the port if needed
+  },
 })

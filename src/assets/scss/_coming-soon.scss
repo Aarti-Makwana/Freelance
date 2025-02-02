@@ -18,3 +18,23 @@
 .coming-box {
     width: 25%;
 }
+// 
+// coming-soon.scss
+//
+
+.counter-number {
+    font-size: 32px;
+    font-weight: $font-weight-semibold;
+    text-align: center;
+    display: flex;
+    span {
+        font-size: 16px;
+        font-weight: $font-weight-normal;
+        display: block;
+        padding-top: 5px;
+    }
+}
+
+.coming-box {
+    width: 25%;
+}
